@@ -9,7 +9,7 @@
     "dev": "tsx watch src/server/main.ts",
     "start": "tsx src/server/main.ts",
     "seed": "tsx src/scripts/seed.ts",
-    "test": "node --import tsx/esm --test tests/quotes.test.ts tests/quotes-count.test.ts tests/quotes-filter.test.ts",
+    "test": "node --import tsx/esm --test \"tests/*.test.ts\"",
     "lint": "prettier --check \"src/**/*.ts\" \"public/**/*.{html,js}\" \"tests/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\" \"public/**/*.{html,js}\" \"tests/**/*.ts\"",
     "claude:review": "git diff origin/main...HEAD | claude --bare -p \"$(cat .claude/review-prompt.md)\" --output-format json --allowedTools 'Read,Grep,Glob' | jq -r '.result'"
