@@ -1,0 +1,29 @@
+{
+  "name": "qotd-service",
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/server/main.ts",
+    "start": "tsx src/server/main.ts",
+    "seed": "tsx src/scripts/seed.ts",
+    "test": "node --import tsx/esm --test tests/quotes.test.ts tests/quotes-count.test.ts tests/quotes-filter.test.ts",
+    "lint": "prettier --check \"src/**/*.ts\" \"public/**/*.{html,js}\" \"tests/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" \"public/**/*.{html,js}\" \"tests/**/*.ts\"",
+    "claude:review": "git diff origin/main...HEAD | claude --bare -p \"$(cat .claude/review-prompt.md)\" --output-format json --allowedTools 'Read,Grep,Glob' | jq -r '.result'"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.0.0",
+    "better-sqlite3": "^12.9.0",
+    "hono": "^4.12.15"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^25.6.0",
+    "prettier": "^3.8.3",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  }
+}

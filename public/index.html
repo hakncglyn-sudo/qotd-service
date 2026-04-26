@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quote of the Day</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+      }
+      body {
+        max-width: 720px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        line-height: 1.5;
+      }
+      h1 {
+        margin-bottom: 0.25rem;
+      }
+      .meta {
+        color: #6b7280;
+        margin-bottom: 1rem;
+      }
+      .controls {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+      input,
+      button {
+        padding: 0.5rem 0.75rem;
+        font: inherit;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+      }
+      button {
+        cursor: pointer;
+        background: #2563eb;
+        color: white;
+        border-color: #1d4ed8;
+      }
+      button:hover {
+        background: #1d4ed8;
+      }
+      .card {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+      }
+      .author {
+        color: #6b7280;
+        font-size: 0.9rem;
+      }
+      #error {
+        color: #b91c1c;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Quote of the Day</h1>
+    <p class="meta">Total: <span id="counter" aria-live="polite">…</span></p>
+
+    <div class="controls">
+      <button id="random-btn" type="button" aria-label="Show a random quote">Random</button>
+      <button id="refresh-btn" type="button" aria-label="Reload all quotes">Refresh</button>
+      <input
+        id="filter-input"
+        type="search"
+        placeholder="Filter by author"
+        aria-label="Filter quotes by author"
+      />
+      <button id="filter-btn" type="button" aria-label="Apply author filter">Filter</button>
+      <button id="clear-btn" type="button" aria-label="Clear filter">Clear</button>
+    </div>
+
+    <p id="error" role="alert"></p>
+    <div id="list"></div>
+
+    <script type="module">
+      const $ = (id) => document.getElementById(id);
+      const listEl = $('list');
+      const errorEl = $('error');
+      const counterEl = $('counter');
+      const filterInput = $('filter-input');
+
+      const escape = (s) =>
+        String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+
+      const renderQuotes = (quotes) => {
+        if (!quotes.length) {
+          listEl.innerHTML = '<p>No quotes match.</p>';
+          return;
+        }
+        listEl.innerHTML = quotes
+          .map(
+            (q) =>
+              `<div class="card"><p>${escape(q.text)}</p><p class="author">— ${escape(q.author)}</p></div>`,
+          )
+          .join('');
+      };
+
+      const setError = (msg) => {
+        errorEl.textContent = msg ?? '';
+      };
+
+      const fetchJson = async (url, opts) => {
+        const res = await fetch(url, opts);
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const err = body?.error?.message ?? `HTTP ${res.status}`;
+          throw new Error(err);
+        }
+        return body;
+      };
+
+      const loadList = async (author) => {
+        setError('');
+        try {
+          const url = author ? `/api/quotes?author=${encodeURIComponent(author)}` : '/api/quotes';
+          const { data } = await fetchJson(url);
+          renderQuotes(data ?? []);
+        } catch (e) {
+          setError(`Could not load quotes: ${e.message}`);
+        }
+      };
+
+      const loadCount = async () => {
+        try {
+          const { data } = await fetchJson('/api/quotes/count');
+          counterEl.textContent = String(data.count);
+        } catch {
+          counterEl.textContent = '?';
+        }
+      };
+
+      const showRandom = async () => {
+        setError('');
+        try {
+          const { data } = await fetchJson('/api/quotes/random');
+          renderQuotes([data]);
+        } catch (e) {
+          setError(`Could not load random quote: ${e.message}`);
+        }
+      };
+
+      $('random-btn').addEventListener('click', showRandom);
+      $('refresh-btn').addEventListener('click', () => {
+        filterInput.value = '';
+        loadList();
+        loadCount();
+      });
+      $('filter-btn').addEventListener('click', () => loadList(filterInput.value.trim()));
+      $('clear-btn').addEventListener('click', () => {
+        filterInput.value = '';
+        loadList();
+      });
+      filterInput.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') loadList(filterInput.value.trim());
+      });
+
+      loadList();
+      loadCount();
+    </script>
+  </body>
+</html>
