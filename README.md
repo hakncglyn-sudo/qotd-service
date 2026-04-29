@@ -56,6 +56,36 @@ The reusable bits (5 agents, 2 skills, 2 hooks) are packaged at
 `../qotd-toolkit/` — install in any sibling repo with
 `claude --plugin-dir <path>` for a one-command house-style starter.
 
+## Notes for Windows users (Git Bash / Cygwin)
+
+The training manual was originally written against macOS / Linux / WSL. On
+**native Windows shells** there are three small things to know:
+
+1. **`gh` and `jq` are required.** Install them once before Phase 4 / Phase 8:
+   ```powershell
+   winget install --id GitHub.cli
+   winget install --id jqlang.jq
+   gh auth login
+   ```
+   Without `jq`, the `.claude/hooks/protect-files.sh` PreToolUse hook silently
+   fails to parse tool input. Without `gh`, Phase 8/9 PR commands fall back to
+   curl + the GitHub REST API.
+
+2. **npm scripts use double quotes around globs.** `package.json` here uses
+   `"tests/*.test.ts"` and `"src/**/*.ts"` (double quotes). Single quotes are
+   passed literally by `cmd.exe` and produce
+   `No files matching the pattern were found: 'src/**/*.ts'`. Prettier and
+   Node's `--test` runner both expand the pattern themselves once the shell
+   strips the double quotes.
+
+3. **Local `master` vs remote `main`.** If you bootstrap with `git init` (not
+   `gh repo create --clone`) the local default branch is `master` while
+   GitHub's default is `main`. After the first push, rename:
+   ```bash
+   git branch -m master main
+   git branch -u origin/main main
+   ```
+
 ## License
 
 Internal training material — Softtech Claude Code Enablement Series.
