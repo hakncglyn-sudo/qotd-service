@@ -9,9 +9,15 @@ multi-agent toolkit committed under `.claude/`.
 - List quotes (`GET /api/quotes`), filter by author (`?author=...`)
 - Random quote (`GET /api/quotes/random`)
 - Total count (`GET /api/quotes/count`)
+- Author detail (`GET /api/quotes/by-author/:author`) — returns
+  `{ data: { author, count, quotes[] } }`, 404 when no quotes match
+- Author roster (`GET /api/authors`) — distinct authors with counts,
+  sorted by `count DESC, author ASC`
 - Create (`POST /api/quotes`) with input validation (`INVALID_INPUT`)
 - Delete (`DELETE /api/quotes/:id`) with `NOT_FOUND` semantics
-- Static UI at `/` with counter, random, refresh, and author-filter controls
+- Static UI at `/` with a hero "Quote of the Day" card, clickable
+  author chips, datalist autocomplete on the filter input, and a
+  light/dark theme that follows `prefers-color-scheme`
 
 ## Running locally
 
@@ -19,7 +25,7 @@ multi-agent toolkit committed under `.claude/`.
 npm install
 npm run seed   # populates 5 starter quotes on first run
 npm run dev    # starts on http://localhost:3000
-npm test       # runs the node:test suite (5 tests)
+npm test       # runs the node:test suite (11 tests)
 npm run lint   # prettier --check
 ```
 

@@ -38,6 +38,9 @@ const stmtInsert = db.prepare(
 const stmtDelete = db.prepare('DELETE FROM quotes WHERE id = ?');
 const stmtCount = db.prepare('SELECT COUNT(*) AS n FROM quotes');
 const stmtGet = db.prepare('SELECT id, text, author, created_at FROM quotes WHERE id = ?');
+const stmtAuthors = db.prepare(
+  'SELECT author, COUNT(*) AS count FROM quotes GROUP BY author ORDER BY count DESC, author ASC',
+);
 
 export const listQuotes = (author?: string): Quote[] => {
   if (author && author.length > 0) {
@@ -68,6 +71,10 @@ export const countQuotes = (): number => {
 
 export const getQuote = (id: number): Quote | undefined => {
   return stmtGet.get(id) as Quote | undefined;
+};
+
+export const listAuthors = (): Array<{ author: string; count: number }> => {
+  return stmtAuthors.all() as Array<{ author: string; count: number }>;
 };
 
 const SEED_QUOTES: Array<{ text: string; author: string }> = [
