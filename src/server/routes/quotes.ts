@@ -1,5 +1,12 @@
 import { Hono } from 'hono';
-import { countQuotes, deleteQuote, getRandomQuote, insertQuote, listQuotes } from '../db.ts';
+import {
+  countQuotes,
+  deleteQuote,
+  getRandomQuote,
+  insertQuote,
+  listAuthors,
+  listQuotes,
+} from '../db.ts';
 
 export const quotesRouter = new Hono();
 
@@ -21,6 +28,26 @@ quotesRouter.get('/quotes/random', (c) => {
     return c.json(errorBody('NOT_FOUND', 'No quotes available.'), 404);
   }
   return c.json({ data: row });
+});
+
+quotesRouter.get('/authors', (c) => {
+  const data = listAuthors();
+  return c.json({ data });
+});
+
+quotesRouter.get('/quotes/by-author/:author', (c) => {
+  const author = c.req.param('author');
+  if (typeof author !== 'string' || author.length === 0) {
+    return c.json(errorBody('INVALID_INPUT', 'Author is required.'), 400);
+  }
+  if (author.length > 200) {
+    return c.json(errorBody('INVALID_INPUT', 'Author too long.'), 400);
+  }
+  const quotes = listQuotes(author);
+  if (quotes.length === 0) {
+    return c.json(errorBody('NOT_FOUND', 'No quotes found for that author.'), 404);
+  }
+  return c.json({ data: { author, count: quotes.length, quotes } });
 });
 
 quotesRouter.post('/quotes', async (c) => {

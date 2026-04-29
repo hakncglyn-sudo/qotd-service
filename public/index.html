@@ -11,54 +11,179 @@
           system-ui,
           -apple-system,
           sans-serif;
+
+        --bg: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+        --card-bg: #ffffff;
+        --card-border: #d1d5db;
+        --primary-bg: #2563eb;
+        --primary-fg: #ffffff;
+        --primary-border: #1d4ed8;
+        --secondary-bg: #ffffff;
+        --secondary-fg: #1f2937;
+        --secondary-border: #d1d5db;
+        --error: #b91c1c;
+        --hero-bg: #f8fafc;
+        --hero-border: #cbd5e1;
+        --chip-bg: transparent;
+        --chip-fg: #2563eb;
+        --chip-border: #cbd5e1;
+        --input-bg: #ffffff;
       }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b0f17;
+          --text: #e5e7eb;
+          --muted: #9ca3af;
+          --card-bg: #111827;
+          --card-border: #1f2937;
+          --primary-bg: #2563eb;
+          --primary-fg: #ffffff;
+          --primary-border: #1d4ed8;
+          --secondary-bg: #111827;
+          --secondary-fg: #e5e7eb;
+          --secondary-border: #374151;
+          --error: #f87171;
+          --hero-bg: #0f172a;
+          --hero-border: #1e293b;
+          --chip-bg: transparent;
+          --chip-fg: #60a5fa;
+          --chip-border: #374151;
+          --input-bg: #0f172a;
+        }
+      }
+
       body {
         max-width: 720px;
         margin: 2rem auto;
         padding: 0 1rem;
         line-height: 1.5;
+        background: var(--bg);
+        color: var(--text);
       }
       h1 {
         margin-bottom: 0.25rem;
       }
+      h2 {
+        margin-top: 2rem;
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
       .meta {
-        color: #6b7280;
+        color: var(--muted);
         margin-bottom: 1rem;
       }
+
       .controls {
         display: flex;
         gap: 0.5rem;
         margin-bottom: 1rem;
         flex-wrap: wrap;
       }
+
       input,
       button {
         padding: 0.5rem 0.75rem;
         font: inherit;
         border-radius: 6px;
-        border: 1px solid #d1d5db;
+        border: 1px solid var(--card-border);
+      }
+      input {
+        background: var(--input-bg);
+        color: var(--text);
       }
       button {
         cursor: pointer;
-        background: #2563eb;
-        color: white;
-        border-color: #1d4ed8;
       }
-      button:hover {
-        background: #1d4ed8;
+
+      .btn-primary {
+        background: var(--primary-bg);
+        color: var(--primary-fg);
+        border-color: var(--primary-border);
       }
+      .btn-primary:hover {
+        filter: brightness(0.92);
+      }
+
+      .btn-secondary {
+        background: var(--secondary-bg);
+        color: var(--secondary-fg);
+        border-color: var(--secondary-border);
+      }
+      .btn-secondary:hover {
+        filter: brightness(0.95);
+      }
+
       .card {
-        border: 1px solid #d1d5db;
+        border: 1px solid var(--card-border);
+        background: var(--card-bg);
         border-radius: 8px;
         padding: 1rem;
         margin-bottom: 0.75rem;
       }
+
       .author {
-        color: #6b7280;
+        color: var(--muted);
         font-size: 0.9rem;
       }
+
+      /* Hero card */
+      .hero-card {
+        border: 1px solid var(--hero-border);
+        background: var(--hero-bg);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .hero-card .hero-quote {
+        font-style: italic;
+        font-size: 1.25rem;
+        line-height: 1.45;
+        margin: 0 0 0.75rem 0;
+      }
+      .hero-card .hero-author {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin: 0 0 1rem 0;
+      }
+      .hero-card .hero-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .hero-card .hero-loading {
+        color: var(--muted);
+        font-style: italic;
+      }
+
+      /* Author chip */
+      .author-chip {
+        display: inline-block;
+        padding: 0.15rem 0.55rem;
+        font-size: 0.85rem;
+        background: var(--chip-bg);
+        color: var(--chip-fg);
+        border: 1px solid var(--chip-border);
+        border-radius: 999px;
+        cursor: pointer;
+      }
+      .author-chip:hover {
+        filter: brightness(0.95);
+        text-decoration: underline;
+      }
+
+      .author-detail-header {
+        margin: 0 0 0.75rem 0;
+        color: var(--text);
+      }
+
       #error {
-        color: #b91c1c;
+        color: var(--error);
+        min-height: 1.25rem;
       }
     </style>
   </head>
@@ -66,28 +191,46 @@
     <h1>Quote of the Day</h1>
     <p class="meta">Total: <span id="counter" aria-live="polite">…</span></p>
 
+    <section id="hero" aria-label="Quote of the day">
+      <div class="hero-card">
+        <p class="hero-loading">Loading today's quote…</p>
+      </div>
+    </section>
+
     <div class="controls">
-      <button id="random-btn" type="button" aria-label="Show a random quote">Random</button>
-      <button id="refresh-btn" type="button" aria-label="Reload all quotes">Refresh</button>
       <input
         id="filter-input"
         type="search"
         placeholder="Filter by author"
         aria-label="Filter quotes by author"
+        list="authors-list"
+        autocomplete="off"
       />
-      <button id="filter-btn" type="button" aria-label="Apply author filter">Filter</button>
-      <button id="clear-btn" type="button" aria-label="Clear filter">Clear</button>
+      <datalist id="authors-list"></datalist>
+      <button id="filter-btn" class="btn-secondary" type="button" aria-label="Apply author filter">
+        Filter
+      </button>
+      <button id="clear-btn" class="btn-secondary" type="button" aria-label="Clear filter">
+        Clear
+      </button>
+      <button id="refresh-btn" class="btn-secondary" type="button" aria-label="Reload all quotes">
+        Refresh
+      </button>
     </div>
 
     <p id="error" role="alert"></p>
+
+    <h2>All quotes</h2>
     <div id="list"></div>
 
     <script type="module">
       const $ = (id) => document.getElementById(id);
       const listEl = $('list');
+      const heroEl = $('hero');
       const errorEl = $('error');
       const counterEl = $('counter');
       const filterInput = $('filter-input');
+      const authorsListEl = $('authors-list');
 
       const escape = (s) =>
         String(s)
@@ -95,19 +238,6 @@
           .replace(/</g, '&lt;')
           .replace(/>/g, '&gt;')
           .replace(/"/g, '&quot;');
-
-      const renderQuotes = (quotes) => {
-        if (!quotes.length) {
-          listEl.innerHTML = '<p>No quotes match.</p>';
-          return;
-        }
-        listEl.innerHTML = quotes
-          .map(
-            (q) =>
-              `<div class="card"><p>${escape(q.text)}</p><p class="author">— ${escape(q.author)}</p></div>`,
-          )
-          .join('');
-      };
 
       const setError = (msg) => {
         errorEl.textContent = msg ?? '';
@@ -121,6 +251,51 @@
           throw new Error(err);
         }
         return body;
+      };
+
+      const authorChip = (author) =>
+        `<button class="author-chip" type="button" data-author="${escape(
+          author,
+        )}" aria-label="Show details for ${escape(author)}">${escape(author)}</button>`;
+
+      const quoteCard = (q) =>
+        `<div class="card"><p>${escape(q.text)}</p><p class="author">— ${authorChip(
+          q.author,
+        )}</p></div>`;
+
+      const renderQuotes = (quotes) => {
+        if (!quotes.length) {
+          listEl.innerHTML = '<p>No quotes match.</p>';
+          return;
+        }
+        listEl.innerHTML = quotes.map(quoteCard).join('');
+      };
+
+      const renderHero = (q) => {
+        if (!q) {
+          heroEl.innerHTML =
+            '<div class="hero-card"><p class="hero-loading">No quote available.</p></div>';
+          return;
+        }
+        heroEl.innerHTML = `
+          <div class="hero-card">
+            <p class="hero-quote">${escape(q.text)}</p>
+            <p class="hero-author">— ${authorChip(q.author)}</p>
+            <div class="hero-actions">
+              <button id="hero-random-btn" class="btn-primary" type="button" aria-label="Show another random quote">New random</button>
+            </div>
+          </div>
+        `;
+        $('hero-random-btn').addEventListener('click', showRandom);
+      };
+
+      const renderAuthorDetail = (data) => {
+        const quotes = data.quotes ?? [];
+        const header = `<p class="author-detail-header"><strong>Author:</strong> ${escape(
+          data.author,
+        )} — ${data.count} quote(s)</p>`;
+        const cards = quotes.map(quoteCard).join('');
+        listEl.innerHTML = header + (cards || '<p>No quotes match.</p>');
       };
 
       const loadList = async (author) => {
@@ -147,13 +322,61 @@
         setError('');
         try {
           const { data } = await fetchJson('/api/quotes/random');
-          renderQuotes([data]);
+          renderHero(data);
         } catch (e) {
           setError(`Could not load random quote: ${e.message}`);
         }
       };
 
-      $('random-btn').addEventListener('click', showRandom);
+      const showAuthorDetail = async (authorArg) => {
+        setError('');
+        const author = (authorArg ?? filterInput.value).trim();
+        if (!author) {
+          setError('Type an author name first.');
+          return;
+        }
+        try {
+          const res = await fetch(`/api/quotes/by-author/${encodeURIComponent(author)}`);
+          const body = await res.json().catch(() => ({}));
+          if (res.status === 404) {
+            listEl.innerHTML = '';
+            setError('No quotes found for that author.');
+            return;
+          }
+          if (!res.ok) {
+            const msg = body?.error?.message ?? `HTTP ${res.status}`;
+            throw new Error(msg);
+          }
+          renderAuthorDetail(body.data);
+        } catch (e) {
+          setError(`Could not load author detail: ${e.message}`);
+        }
+      };
+
+      const loadAuthorsDatalist = async () => {
+        try {
+          const { data } = await fetchJson('/api/authors');
+          if (!Array.isArray(data)) return;
+          authorsListEl.innerHTML = data
+            .map((a) => `<option value="${escape(a.author)}"></option>`)
+            .join('');
+        } catch {
+          // silent — autocomplete is enhancement
+        }
+      };
+
+      // Event delegation for author chips on hero + list
+      const onChipClick = (ev) => {
+        const chip = ev.target.closest('.author-chip');
+        if (!chip) return;
+        const author = chip.dataset.author ?? '';
+        if (!author) return;
+        filterInput.value = author;
+        showAuthorDetail(author);
+      };
+      heroEl.addEventListener('click', onChipClick);
+      listEl.addEventListener('click', onChipClick);
+
       $('refresh-btn').addEventListener('click', () => {
         filterInput.value = '';
         loadList();
@@ -168,8 +391,11 @@
         if (ev.key === 'Enter') loadList(filterInput.value.trim());
       });
 
+      // Initial load
+      showRandom();
       loadList();
       loadCount();
+      loadAuthorsDatalist();
     </script>
   </body>
 </html>
